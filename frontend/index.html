@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send Emails with PDF</title>
+</head>
+<body>
+  <h2>Upload Excel & PDF to Send Emails</h2>
+  <form id="uploadForm">
+    <label>Select Excel File (.xlsx):</label><br>
+    <input type="file" name="excel" accept=".xlsx" required><br><br>
+
+    <label>Select PDF File:</label><br>
+    <input type="file" name="pdf" accept=".pdf" required><br><br>
+
+    <button type="submit">Send Emails</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      document.getElementById('status').textContent = 'Sending emails...';
+
+      try {
+        const res = await fetch('http://localhost:5000/send-emails', {
+          method: 'POST',
+          body: formData
+        });
+
+        const text = await res.text();
+        document.getElementById('status').textContent = text;
+      } catch (err) {
+        document.getElementById('status').textContent = 'Failed to send emails.';
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
