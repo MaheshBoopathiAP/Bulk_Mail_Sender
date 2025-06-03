@@ -11,7 +11,7 @@ const EmailSender = () => {
     setStatus("Sending emails...");
 
     try {
-      const res = await fetch("http://localhost:5000/send-emails", {
+      const res = await fetch("https://bulk-mail-sender-a46g.onrender.com/send-emails", {
         method: "POST",
         body: formData,
       });

@@ -38,18 +38,7 @@ app.post('/send-emails', upload.fields([{ name: 'excel' }, { name: 'pdf' }]), as
 
     const emailTemplate = ({ name, company }) => `
 Hi ${name},
-I’m a full-stack developer with expertise in modern technologies like React, Node.js, Python, and cloud platforms (AWS/Docker). I’ve been following ${company} and admire the work you’re doing—I’d love to contribute.
 
-Here’s why we should talk:
-
-- I build fast, scalable, and clean applications.
-- I stay updated with the latest tech trends.
-- I’m eager to solve real-world problems with your team.
-
-Attached is my resume. Let’s chat about how I can add value to ${company}.
-
-Warm regards,  
-Mahesh Boopathi A P
 `;
 
     for (const row of data) {
@@ -67,7 +56,7 @@ Mahesh Boopathi A P
       await transporter.sendMail({
         from: 'maheoffi@gmail.com',
         to: email,
-        subject: `Full-Stack Developer Interested in Joining ${company}`,
+        subject: ` ${company}`,
         text: mailText,
         attachments: [
           {
