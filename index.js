@@ -4,19 +4,15 @@ const xlsx = require('xlsx');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
+app.use(cors());
+const PORT=process.env.PORT
 
-// Enable CORS for all origins (you can restrict it later if needed)
-app.use(cors({ origin: '*' }));
-
-const PORT = process.env.PORT || 5000;
-
-// Configure Multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
-// API Endpoint
 app.post('/send-emails', upload.fields([{ name: 'excel' }, { name: 'pdf' }]), async (req, res) => {
   try {
     const excelFile = req.files.excel[0];
@@ -31,14 +27,15 @@ app.post('/send-emails', upload.fields([{ name: 'excel' }, { name: 'pdf' }]), as
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'maheoffi@gmail.com',
-        pass: 'uhprddwtmfooonuc',
+        user: 'write your email',
+        pass: 'jwrite your pass',
       },
     });
 
     const emailTemplate = ({ name, company }) => `
-Hi ${name},
-         I’m a full-stack developer with expertise in modern technologies like React, Springboot, PostgreSQL etc... I’ve been following ${company} and admire the work you’re doing—I’d love to contribute.
+         Hi ${name},
+        
+         I’m a full-stack developer with expertise in modern technologies like React, Node.js, Python, and cloud platforms (AWS/Docker). I’ve been following ${company} and admire the work you’re doing—I’d love to contribute.
 
          Here’s why we should talk:
 
@@ -51,8 +48,9 @@ Hi ${name},
          Attached is my resume. Let’s chat about how I can add value to ${company}.
 
          Warm regards,  
-         Mahesh Boopathi
+         Sagar
     `;
+    
 
     for (const row of data) {
       const email = row.Email || row.email;
@@ -60,20 +58,25 @@ Hi ${name},
 
       const [namePart, domainPart] = email.split('@');
       const name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-      const company = domainPart.split('.')[0];
+      const company = domainPart.split('.')[0]; // e.g., gmail -> Gmail
 
-      const mailText = emailTemplate({ name, company });
-
-      console.log(`Sending email to: ${email}`);
+      const mailText = emailTemplate({
+        name,
+        company,
+        triggerEvent: row.TriggerEvent || 'something amazing',
+        similarCompany: row.SimilarCompany || 'a similar client',
+        benefit: row.Benefit || 'improving efficiency',
+        specificTime: row.SpecificTime || 'this Friday at 2 PM',
+      });
 
       await transporter.sendMail({
-        from: 'maheoffi@gmail.com',
+        from: 'write your email',
         to: email,
         subject: `Full-Stack Developer Interested in Joining ${company}`,
         text: mailText,
         attachments: [
           {
-            filename: 'Mahesh___CV (4).pdf',
+            filename: 'Resume.pdf',
             content: pdfBuffer,
           },
         ],
@@ -90,5 +93,4 @@ Hi ${name},
   }
 });
 
-// Start server
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
