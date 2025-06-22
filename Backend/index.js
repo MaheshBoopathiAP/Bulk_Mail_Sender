@@ -37,22 +37,25 @@ app.post('/send-emails', upload.fields([{ name: 'excel' }, { name: 'pdf' }]), as
     });
 
     const emailTemplate = ({ name, company }) => `
-Hi ${name},
-         I’m a full-stack developer with expertise in modern technologies like React, Springboot, PostgreSQL etc... I’ve been following ${company} and admire the work you’re doing—I’d love to contribute.
+      Hi ${name},
 
-         Here’s why we should talk:
+      I'm Mahesh Boopathi, a full-stack developer with hands-on experience in technologies like React, Spring Boot, PostgreSQL, and AWS.
 
-         I build fast, scalable, and clean applications.
+      I've been following ${company} and really admire the work your team is doing. I’d love the opportunity to contribute and grow alongside you.
 
-         I stay updated with the latest tech trends.
+      Here’s why I believe we should connect:
+      - I build fast, scalable, and maintainable full-stack applications.
+      - I stay up to date with the latest trends in web development.
+      - I’m passionate about solving real-world problems through clean code and collaboration.
 
-         I’m eager to solve real-world problems with your team.
+      I've attached my resume for your reference. I’d be thrilled to connect and explore how I can bring value to ${company}.
 
-         Attached is my resume. Let’s chat about how I can add value to ${company}.
+      Looking forward to hearing from you.
 
-         Warm regards,  
-         Mahesh Boopathi
-    `;
+      Warm regards,  
+      Mahesh Boopathi
+      `;
+
 
     for (const row of data) {
       const email = row.Email || row.email;
