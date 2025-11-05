@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const app = express();
 
-// Enable CORS for all origins (you can restrict it later if needed)
+// Enable CORS for all origins (you can restrict this later)
 app.use(cors({ origin: '*' }));
 
 const PORT = process.env.PORT || 5000;
@@ -16,82 +16,111 @@ const PORT = process.env.PORT || 5000;
 // Configure Multer for file uploads
 const upload = multer({ dest: 'uploads/' });
 
-// API Endpoint
+// Email content template (no company name)
+const emailTemplate = ({ name }) => `
+Hi ${name},
+
+I'm Mahesh Boopathi, a Full-Stack Developer with hands-on experience in building scalable web applications using
+Spring Boot, React.js, and PostgreSQL.
+
+I currently work on enterprise-scale software solutions, where I’ve designed and deployed Spring Boot microservices
+processing over 100K transactions per hour, optimized PostgreSQL queries for performance, and developed
+React dashboards to enhance user experience and data visualization.
+
+I’m passionate about backend and frontend engineering, cloud deployment on AWS, and building impactful
+full-stack applications that solve real-world problems.
+
+I’ve attached my resume for your reference and would love the opportunity to connect and discuss potential roles
+that align with my skills.
+
+Warm regards,  
+Mahesh Boopathi  
+Email: maheoffi@gmail.com  
+LinkedIn: https://www.linkedin.com/in/mahesh-boopathi-a-p/
+`;
+
+// API Endpoint: Upload Excel + PDF and send emails
 app.post('/send-emails', upload.fields([{ name: 'excel' }, { name: 'pdf' }]), async (req, res) => {
   try {
-    const excelFile = req.files.excel[0];
-    const pdfFile = req.files.pdf[0];
+    const excelFile = req.files?.excel?.[0];
+    const pdfFile = req.files?.pdf?.[0];
 
+    if (!excelFile || !pdfFile) {
+      return res.status(400).send('Both Excel and PDF files are required.');
+    }
+
+    // Read Excel file
     const workbook = xlsx.readFile(excelFile.path);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
 
+    // Read PDF file as buffer
     const pdfBuffer = fs.readFileSync(pdfFile.path);
 
+    // Setup email transporter (using environment variables)
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'maheoffi@gmail.com',
-        pass: 'uhprddwtmfooonuc',
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    const emailTemplate = ({ name, company }) => `
-      Hi ${name},
+    let sentCount = 0;
+    let skippedCount = 0;
 
-      I'm Mahesh Boopathi, a full-stack developer with hands-on experience in technologies like React, Spring Boot, PostgreSQL, and AWS.
-
-      I've been following ${company} and really admire the work your team is doing. I’d love the opportunity to contribute and grow alongside you.
-
-      Here’s why I believe we should connect:
-      - I build fast, scalable, and maintainable full-stack applications.
-      - I stay up to date with the latest trends in web development.
-      - I’m passionate about solving real-world problems through clean code and collaboration.
-
-      I've attached my resume for your reference. I’d be thrilled to connect and explore how I can bring value to ${company}.
-
-      Looking forward to hearing from you.
-
-      Warm regards,  
-      Mahesh Boopathi
-      `;
-
-
+    // Loop through each email address in Excel
     for (const row of data) {
-      const email = row.Email || row.email;
-      if (!email) continue;
+      const email = (row.Email || row.email || '').trim();
 
-      const [namePart, domainPart] = email.split('@');
-      const name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-      const company = domainPart.split('.')[0];
+      // Skip empty or invalid emails
+      if (!email || !email.includes('@')) {
+        console.warn('⚠️ Skipping invalid email:', email);
+        skippedCount++;
+        continue;
+      }
 
-      const mailText = emailTemplate({ name, company });
+      const [namePart] = email.split('@');
+      const name =
+        namePart && namePart.length > 0
+          ? namePart.charAt(0).toUpperCase() + namePart.slice(1)
+          : 'there';
 
-      console.log(`Sending email to: ${email}`);
+      const mailText = emailTemplate({ name });
 
-      await transporter.sendMail({
-        from: 'maheoffi@gmail.com',
-        to: email,
-        subject: `Full-Stack Developer Interested in Joining ${company}`,
-        text: mailText,
-        attachments: [
-          {
-            filename: 'Mahesh___CV (4).pdf',
-            content: pdfBuffer,
-          },
-        ],
-      });
+      console.log(`📧 Sending email to: ${email}`);
+
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: `Full-Stack Developer — Application`,
+          text: mailText,
+          attachments: [
+            {
+              filename: 'Mahesh_Boopathi_CV.pdf',
+              content: pdfBuffer,
+            },
+          ],
+        });
+
+        sentCount++;
+      } catch (mailErr) {
+        console.error(`❌ Failed to send to ${email}:`, mailErr.message);
+        skippedCount++;
+      }
     }
 
+    // Clean up uploaded files
     fs.unlinkSync(excelFile.path);
     fs.unlinkSync(pdfFile.path);
 
-    res.send('Emails sent successfully!');
+    res.send(`✅ Emails sent: ${sentCount} | ⚠️ Skipped: ${skippedCount}`);
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error sending emails');
+    console.error('Error:', err);
+    res.status(500).send('❌ Error sending emails.');
   }
 });
 
-// Start server
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+// Start the backend server
+app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));

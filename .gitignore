@@ -1,0 +1,55 @@
+# -----------------------
+# Node.js / Express Backend
+# -----------------------
+Backend/node_modules/
+Backend/.env
+Backend/.env.local
+Backend/npm-debug.log*
+Backend/yarn-debug.log*
+Backend/yarn-error.log*
+Backend/package-lock.json
+
+# Ignore uploaded files (temp data)
+Backend/uploads/*
+
+# Logs and temporary files
+Backend/logs/
+Backend/*.log
+Backend/debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# -----------------------
+# React Frontend
+# -----------------------
+frontend/Frontend/node_modules/
+frontend/Frontend/dist/
+frontend/Frontend/build/
+frontend/Frontend/.env
+frontend/Frontend/.env.local
+frontend/Frontend/.DS_Store
+frontend/Frontend/npm-debug.log*
+frontend/Frontend/yarn-debug.log*
+frontend/Frontend/yarn-error.log*
+frontend/Frontend/package-lock.json
+
+# Vite specific
+frontend/Frontend/.vite/
+frontend/Frontend/.cache/
+
+# -----------------------
+# IDE / Editor specific
+# -----------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -----------------------
+# Miscellaneous
+# -----------------------
+*.bak
+*.tmp
+*.log
